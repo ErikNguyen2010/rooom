@@ -22,32 +22,47 @@ def receive_messages(sock):
 # Gửi tin nhắn lên server
 def send_messages(sock, username):
     while True:
-        msg = input()
-        if msg.lower() == "/quit":
+        try:
+            msg = input()
+            if msg.lower() == "/quit":
+                sock.send(msg.encode('utf-8'))
+                print("Bạn đã thoát khỏi chat.")
+                break
+
+            # Gửi tin nhắn kèm nội dung
             sock.send(msg.encode('utf-8'))
-            print("Bạn đã thoát khỏi chat.")
+
+            # Chỉ hiển thị lại tin nhắn công khai (không phải lệnh hoặc tin nhắn riêng tư)
+            if not msg.startswith('/') and not msg.startswith('@'):
+                print(f"{username}: {msg}")
+        except:
+            print("Lỗi khi gửi tin nhắn!")
             break
-
-        # Gửi tin nhắn kèm nội dung
-        sock.send(msg.encode('utf-8'))
-
-        # Hiển thị lại tin nhắn mình vừa gửi với username
-        print(f"{username}: {msg}")
 
 # Khởi chạy client
 def start_client():
     username = input("Nhập tên của bạn: ")
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((HOST, PORT))
+    try:
+        sock.connect((HOST, PORT))
+    except:
+        print("Không thể kết nối đến server!")
+        return
 
     # Gửi username lên server ngay sau khi kết nối
     sock.send(username.encode('utf-8'))
 
-    print("Kết nối thành công tới server! Gõ '/quit' để thoát.")
+    print("Kết nối thành công tới server!")
+    print("Các lệnh có sẵn:")
+    print("  /quit - Thoát khỏi chat")
+    print("  /users hoặc /online - Xem danh sách người dùng online")
+    print("  @username tin_nhắn - Gửi tin nhắn riêng tư")
+    print("-" * 50)
 
     # Thread nhận tin nhắn
     thread_receive = threading.Thread(target=receive_messages, args=(sock,))
+    thread_receive.daemon = True  # Đảm bảo thread tự động thoát khi main thread kết thúc
     thread_receive.start()
 
     # Thread gửi tin nhắn
