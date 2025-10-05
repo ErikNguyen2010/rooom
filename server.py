@@ -5,11 +5,11 @@ import threading
 HOST = '127.0.0.1'
 PORT = 5000
 
-# Danh sách client (socket -> username)
+# danh sách client
 clients = {}
 
-# Gửi tin nhắn đến tất cả client (trừ người gửi)
 def broadcast(message, sender_socket):
+# Gửi tin nhắn đến tất cả client (trừ người gửi)
     for client_socket in clients:
         if client_socket != sender_socket:
             try:
@@ -18,8 +18,8 @@ def broadcast(message, sender_socket):
                 client_socket.close()
                 del clients[client_socket]
 
-# Gửi tin nhắn riêng tư đến một user cụ thể
 def send_private_message(message, target_username, sender_socket, sender_username):
+    #gui tin nhan riêng
     target_socket = None
     for client_socket, username in clients.items():
         if username == target_username:
@@ -39,8 +39,8 @@ def send_private_message(message, target_username, sender_socket, sender_usernam
         sender_socket.send(f"[LỖI] Không tìm thấy người dùng '{target_username}'".encode('utf-8'))
         return False
 
-# Gửi danh sách người dùng online
 def send_online_users(client_socket):
+    # xem bao nhieu người dùng online
     user_list = list(clients.values())
     online_message = f"[ONLINE] Người dùng đang online: {', '.join(user_list)}"
     try:
@@ -60,7 +60,7 @@ def handle_client(client_socket):
         clients[client_socket] = username
         print(f"[KẾT NỐI] {username} đã tham gia chat!")
 
-        # Thông báo đến tất cả mọi người
+        # thông báo đến tất cả mọi người
         broadcast(f"{username} đã tham gia phòng chat!", client_socket)
 
         while True:
@@ -80,11 +80,12 @@ def handle_client(client_socket):
                     send_online_users(client_socket)
                     continue
                 
-                # Xử lý tin nhắn riêng tư (@username message)
+                # Xử lý tin nhắn riêng tư 
                 elif msg.startswith('@'):
                     parts = msg.split(' ', 1)
                     if len(parts) >= 2:
-                        target_username = parts[0][1:]  # Bỏ ký tự '@'
+                         # Bỏ ký tự '@'
+                        target_username = parts[0][1:] 
                         private_message = parts[1]
                         if send_private_message(private_message, target_username, client_socket, username):
                             print(f"[RIÊNG TƯ] {username} -> {target_username}: {private_message}")
@@ -105,8 +106,6 @@ def handle_client(client_socket):
 
     except socket.error:
         print(f"[LỖI] Lỗi kết nối socket")
-    except Exception as e:
-        print(f"[LỖI] Lỗi không xác định: {e}")
     finally:
         # Xóa client khi mất kết nối
         if client_socket in clients:
@@ -121,10 +120,10 @@ def handle_client(client_socket):
         except:
             pass
 
-# Khởi chạy server
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Cho phép tái sử dụng địa chỉ
+    # Cho phép tái sử dụng địa chỉ
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     
     try:
         server_socket.bind((HOST, PORT))
@@ -137,7 +136,8 @@ def start_server():
                 client_socket, address = server_socket.accept()
                 print(f"[KẾT NỐI MỚI] Từ {address[0]}:{address[1]}")
                 thread = threading.Thread(target=handle_client, args=(client_socket,))
-                thread.daemon = True  # Thread sẽ tự động thoát khi main thread kết thúc
+                # Thread sẽ tự động thoát khi main thread kết thúc
+                thread.daemon = True  
                 thread.start()
             except socket.error as e:
                 print(f"[LỖI] Lỗi khi chấp nhận kết nối: {e}")
