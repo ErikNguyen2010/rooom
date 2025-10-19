@@ -18,6 +18,7 @@ class ChatClientGUI:
         self.create_login_window()
 
     def create_login_window(self):
+        # mở cửa sổ login
         self.login_frame = tk.Frame(self.root)
         self.login_frame.pack(expand=True)
         
@@ -32,6 +33,7 @@ class ChatClientGUI:
                  font=("Arial", 12), bg="#4CAF50", fg="white").pack(pady=10)
 
     def connect_to_server(self):
+        # connect đền server
         self.username = self.username_entry.get().strip()
         if not self.username:
             messagebox.showerror("Lỗi", "Vui lòng nhập tên!")
@@ -52,6 +54,7 @@ class ChatClientGUI:
             messagebox.showerror("Lỗi kết nối", f"Không thể kết nối đến server: {str(e)}")
 
     def create_chat_window(self):
+        # mở cửa sổ chat
         self.root.title(f"Chat Application - {self.username}")
         
         # Frame chính
@@ -125,6 +128,7 @@ class ChatClientGUI:
         self.root.after(1000, lambda: self.socket.send("/users".encode('utf-8')))
 
     def receive_messages(self):
+        # hàm nhận tin nhắn
         while True:
             try:
                 message = self.socket.recv(1024).decode('utf-8')
@@ -140,6 +144,7 @@ class ChatClientGUI:
                 break
 
     def display_message(self, message):
+        #hàm hien thi tin nhắn
         tag = "normal"
         if "tham gia" in message:
             tag = "join"
@@ -154,7 +159,8 @@ class ChatClientGUI:
         self.message_display.see(tk.END)
 
 
-    def update_users_list(self, online_message):
+    def update_users_list(self, online_message): 
+        #hàm update user đang online
         try:
             # Trích xuất danh sách từ "[ONLINE] Người dùng đang online: user1, user2, ..."
             users_part = online_message.split(": ")[1]
@@ -168,6 +174,7 @@ class ChatClientGUI:
             pass
 
     def send_message(self):
+        # hàm gửi tin nhăn
         message = self.message_entry.get().strip()
         if not message:
             return
@@ -187,6 +194,7 @@ class ChatClientGUI:
             messagebox.showerror("Lỗi", "Không thể gửi tin nhắn!")
 
     def on_user_double_click(self, event):
+        # double click vào user
         selection = self.users_listbox.curselection()
         if selection:
             username = self.users_listbox.get(selection[0])
