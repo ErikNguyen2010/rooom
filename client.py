@@ -5,7 +5,7 @@ from tkinter import messagebox, scrolledtext, ttk
 
 class ChatClientGUI:
     def __init__(self):
-        self.HOST = '127.0.0.1'
+        self.HOST = '192.168.1.24'
         self.PORT = 5000
         self.socket = None
         self.username = ""
